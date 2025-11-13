@@ -1,35 +1,58 @@
-#pragma once
-#include "Maze.h"
+#ifndef SOLVER_H
+#define SOLVER_H
+
+#include <vector>
+#include <string>
+#include <utility>
+#include "Maze.h" // Needs to know about the Maze
 
 class Solver {
 public:
-    using Grid = Maze::Grid;
+    // This enum is used by all your child solvers
+    enum class State {
+        SEARCHING,
+        TRACING_PATH,
+        DONE
+    };
 
-    Solver(const Grid& g, std::pair<int,int> s, std::pair<int,int> e, char markChar)
-        : grid(g), start(s), goal(e), markCh(markChar), done(false), found(false)
-    {}
-
+    // Constructor (matches your Solver.cpp)
+    Solver(const Maze& maze, char marker);
+    
+    // Virtual destructor (good practice for base classes)
     virtual ~Solver() = default;
 
-    // perform one step of the algorithm (one expansion)
+    // --- Public Interface used by main.cpp ---
+
+    // Pure virtual function: forces child classes (BFS, DFS...)
+    // to implement their own step() logic.
     virtual void step() = 0;
 
-    // return whether solver finished
-    bool isFinished() const { return done; }
+    // Checks if the solver is done (this is the FIX)
+    bool isFinished() const {
+        // It's finished when its state is DONE
+        return currentState == State::DONE; 
+    }
 
-    // whether solver found goal
-    bool hasFound() const { return found; }
+    // Accessors used by main.cpp
+    bool wasPathFound() const { return found; }
+    std::vector<std::string> getGrid() const { return grid; }
 
-    // get current grid copy for printing
-    Grid getGrid() const { return grid; }
-
-    char getMark() const { return markCh; }
 
 protected:
-    Grid grid;
-    std::pair<int,int> start;
-    std::pair<int,int> goal;
-    char markCh;
-    bool done;
-    bool found;
+    // --- Members shared by all solvers ---
+
+    char symbol;         // The character to draw (B, D, K, A, etc.)
+    State currentState;  // The current state of the solver
+    bool found;          // Did we find the exit?
+
+    // Maze grid and path data
+    std::vector<std::string> grid;
+    std::pair<int, int> start;
+    std::pair<int, int> goal;
+    std::pair<int, int> tracePos; // For tracing the path back
+    
+    // Parent map for path reconstruction
+    std::vector<std::vector<std::pair<int, int>>> parent; 
 };
+
+#endif // SOLVER_H

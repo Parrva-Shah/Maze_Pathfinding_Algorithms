@@ -3,31 +3,33 @@
 
 #include <vector>
 #include <string>
-#include <utility> 
+#include <utility> // For std::pair
 
 class Maze {
 public:
-    using Grid = std::vector<std::string>;
+    // Construct a maze with given dimensions and optional seed
+    Maze(int rows = 21, int cols = 41, unsigned seed = 0);
 
-    Maze(int rows, int cols);
-    
-    void generateSolvableMaze(int openingFactor = 3);
-    
-    char at(int r, int c) const;
-    void setCell(int r, int c, char val);
-    std::pair<int,int> getStart() const;
-    std::pair<int,int> getGoal() const;
-    int getRows() const;
-    int getCols() const;
-    
-    std::pair<int,int> getEnd() const { return goal; }
-    Grid copyGrid() const { return grid; }
+    // Direct access to the grid (each string = one row)
+    // This is public, so solvers can access it (as per your original design)
+    std::vector<std::string> grid;
 
-    Grid grid;
+    // Accessors
+    std::pair<int, int> getStart() const { return start; }
+    std::pair<int, int> getGoal()  const { return goal;  }
+    int getRows() const { return rows; }
+    int getCols() const { return cols; }
 
 private:
-    int rows, cols;
-    std::pair<int,int> start, goal;
+    int rows;
+    int cols;
+    unsigned seed;
+    std::pair<int, int> start;
+    std::pair<int, int> goal;
+
+    // Private helper function to do the actual generation
+    // The parameter is now wallDensity (e.g., 25 for 25%)
+    void generateSolvableMaze(int wallDensity);
 };
 
-#endif
+#endif  // MAZE_H
