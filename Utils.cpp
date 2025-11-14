@@ -2,13 +2,11 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <cstdlib> // <-- The critical include for system()
+#include <cstdlib> 
 
 using namespace std;
 
 // Define movement directions (Up, Right, Down, Left)
-// This order (0=Up, 1=Right, 2=Down, 3=Left) is
-// required by WallFollower_Solver.
 const array<pair<int,int>,4> directions {{
     {-1, 0},  // 0: Up
     {0, 1},   // 1: Right
@@ -37,7 +35,7 @@ void sleep_ms(int ms) {
     this_thread::sleep_for(chrono::milliseconds(ms));
 }
 
-// --- 2x3 LAYOUT PRINT FUNCTION ---
+// Print function to display multiple mazes side by side
 void printSideBySide(const vector<vector<string>>& grids,
                      const vector<string>& titles)
 {

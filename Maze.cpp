@@ -1,7 +1,7 @@
 #include "Maze.h"
-#include <random>    // <-- Required
-#include <algorithm> // <-- For std.max, std.fill
-#include <ctime>     // Not really used, but fine
+#include <random>    
+#include <algorithm> 
+#include <ctime>     
 
 using namespace std;
 
@@ -14,7 +14,6 @@ Maze::Maze(int rows, int cols, unsigned seed_)
 
     grid.assign(rows, string(cols, '#'));
 
-    // Use a high-quality, non-deterministic seed if none is provided
     if (seed_ != 0) {
         seed = seed_;
     } else {
@@ -22,12 +21,10 @@ Maze::Maze(int rows, int cols, unsigned seed_)
         seed = rd();
     }
 
-    // Generate the maze using the new, simpler logic
-    generateSolvableMaze(25);  // Pass wall density (e.g., 25%)
+    generateSolvableMaze(25);  
 }
 
-// NOTE: The function name is the same, but the logic is totally different.
-// The 'openingFactor' is now 'wallDensity'
+
 void Maze::generateSolvableMaze(int wallDensity) {
     
     // 1. Create the random number generator
@@ -53,7 +50,7 @@ void Maze::generateSolvableMaze(int wallDensity) {
         }
     }
 
-    // 5. "Spray" random walls inside
+    // 5. Add random walls inside
     for (int r = 1; r < rows - 1; ++r) {
         for (int c = 1; c < cols - 1; ++c) {
             // Don't place a wall on S or E

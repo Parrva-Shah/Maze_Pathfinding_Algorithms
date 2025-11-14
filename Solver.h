@@ -4,36 +4,29 @@
 #include <vector>
 #include <string>
 #include <utility>
-#include "Maze.h" // Needs to know about the Maze
+#include "Maze.h" 
 
 class Solver {
 public:
-    // This enum is used by all your child solvers
+    // This enum is used for all solvers to track their state
     enum class State {
         SEARCHING,
         TRACING_PATH,
         DONE
     };
 
-    // Constructor (matches your Solver.cpp)
     Solver(const Maze& maze, char marker);
-    
-    // Virtual destructor (good practice for base classes)
     virtual ~Solver() = default;
-
-    // --- Public Interface used by main.cpp ---
 
     // Pure virtual function: forces child classes (BFS, DFS...)
     // to implement their own step() logic.
     virtual void step() = 0;
 
-    // Checks if the solver is done (this is the FIX)
     bool isFinished() const {
         // It's finished when its state is DONE
         return currentState == State::DONE; 
     }
 
-    // Accessors used by main.cpp
     bool wasPathFound() const { return found; }
     std::vector<std::string> getGrid() const { return grid; }
 
@@ -41,7 +34,7 @@ public:
 protected:
     // --- Members shared by all solvers ---
 
-    char symbol;         // The character to draw (B, D, K, A, etc.)
+    char symbol;         // The character to draw 
     State currentState;  // The current state of the solver
     bool found;          // Did we find the exit?
 
