@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build with SFML",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-g", // Include debug symbols
+                "${fileDirname}/*.cpp", // Compile ALL .cpp files in the folder
+                "-o", // Specify the output file
+                "${fileDirname}/maze_visualizer", // The name of your final program
+                
+                // --- Link the SFML libraries ---
+                "-lsfml-graphics",
+                "-lsfml-window",
+                "-lsfml-system"
+                // Add -lsfml-audio and -lsfml-network if you use them
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true // Makes this the default (Ctrl+Shift+B)
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
