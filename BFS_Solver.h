@@ -12,7 +12,6 @@ public:
     explicit BFS_Solver(const Maze& maze);
 
     void step() override;
-    // bool isFinished() const override; <-- THIS LINE IS REMOVED
 
 private:
     std::queue<std::pair<int,int>> q;

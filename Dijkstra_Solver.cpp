@@ -6,13 +6,12 @@ Dijkstra_Solver::Dijkstra_Solver(const Maze& maze)
 {
     int R = maze.getRows();
     int C = maze.getCols();
-
+    // distMap is a 2D vector<int> storing the currently known shortest distance
     distMap.assign(R, std::vector<int>(C, std::numeric_limits<int>::max()));
     visited.assign(R, std::vector<bool>(C, false)); 
-    // parent in base
 
     distMap[start.first][start.second] = 0;
-    pq.push({0, start});
+    pq.push({0, start});//priority queue (min-heap)
 }
 
 void Dijkstra_Solver::step() {
@@ -47,7 +46,6 @@ void Dijkstra_Solver::step() {
         if (visited[r][c]) continue; // Already processed
         visited[r][c] = true;
 
-        // Color when processing
         if (grid[r][c] == ' ')
             grid[r][c] = symbol;
 
@@ -68,10 +66,8 @@ void Dijkstra_Solver::step() {
                 distMap[nr][nc] = newCost;
                 parent[nr][nc] = {r, c};
                 pq.push({newCost, {nr, nc}});
-                // Don't color here, color when popped
             }
         }
-        // Return after processing one valid node
         return;
     }
 

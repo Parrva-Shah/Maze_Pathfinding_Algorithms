@@ -12,14 +12,14 @@ GreedyBestFirst_Solver::GreedyBestFirst_Solver(const Maze& maze)
     // parent is in base class
     
     int hStart = heuristic(start.first, start.second);
-    openSet.push({hStart, start});
+    openSet.push({hStart, start});// openSet is a std::priority_queue<Node> (min-heap by heuristic).
 }
 
 int GreedyBestFirst_Solver::heuristic(int r, int c) const {
     // Manhattan distance heuristic
     return std::abs(goal.first - r) + std::abs(goal.second - c);
 }
-
+// heuristic(r,c) computes the Manhattan distance from (r,c) to the goal.
 void GreedyBestFirst_Solver::step() {
     // Path Tracing
     if (currentState == State::TRACING_PATH) {
@@ -36,7 +36,7 @@ void GreedyBestFirst_Solver::step() {
 
     if (currentState != State::SEARCHING) return;
     
-    //  Phase 2: Searching
+    //  Searching
     if (openSet.empty()) {
         currentState = State::DONE;
         found = false;

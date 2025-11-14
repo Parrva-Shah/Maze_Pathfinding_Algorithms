@@ -9,7 +9,7 @@ DFS_Solver::DFS_Solver(const Maze& maze)
     visited.assign(R, std::vector<bool>(C, false));
     // 'parent' is initialized in base Solver
     
-    stk.push(start);
+    stk.push(start);//stk is a stack<pair<int,int>> used to implement DFS iteratively.
 }
 
 void DFS_Solver::step() {
@@ -20,7 +20,7 @@ void DFS_Solver::step() {
             return;
         }
         // Use 'X' for the final path
-        if (grid[tracePos.first][tracePos.second] != 'E') {
+        if (grid[tracePos.first][tracePos.second] != 'E') {// grid is a 2D vector<char> representing the maze layout
             grid[tracePos.first][tracePos.second] = 'X';
         }
         tracePos = parent[tracePos.first][tracePos.second];
@@ -29,7 +29,6 @@ void DFS_Solver::step() {
 
     if (currentState != State::SEARCHING) return;
 
-    // --- THIS LOOP IS THE MAIN FIX ---
     // Loop until we find a new node to process or the stack is empty
     while (!stk.empty()) {
         auto [r, c] = stk.top();
@@ -39,8 +38,6 @@ void DFS_Solver::step() {
         if (visited[r][c]) {
             continue; 
         }
-
-        // --- Found a new node to process ---
         visited[r][c] = true;
         if (grid[r][c] == ' ') grid[r][c] = symbol;
 
@@ -64,11 +61,8 @@ void DFS_Solver::step() {
             stk.push({nr, nc});
         }
 
-        // Return *after* processing one valid node
         return;
     }
-    
-    // If we are here, the stack became empty
     if (currentState == State::SEARCHING) {
         currentState = State::DONE;
         found = false;

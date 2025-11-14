@@ -11,14 +11,16 @@ AStar_Solver::AStar_Solver(const Maze& maze)
     int cols = maze.getCols();
 
     // Initialize scores and visited grid
+    //Using a 2D dynamic array (std::vector)
     gScore.assign(rows, vector<vector<int>::value_type>(cols, numeric_limits<int>::max()));
-    visited.assign(rows, vector<bool>(cols, false));
+    //Using a 2D boolean matrix
+    visited.assign(rows, vector<bool>(cols,false));
 
     gScore[start.first][start.second] = 0;
 
     // Push starting node with its f-score
     int fStart = heuristic(start.first, start.second);
-    openSet.push({fStart, start});
+    openSet.push({fStart, start});//a priority_queue (binary heap) that always exposes the node with the lowest 
 }
 
 int AStar_Solver::heuristic(int r, int c) const {
@@ -35,7 +37,7 @@ void AStar_Solver::step() {
             return;
         }
         if (grid[tracePos.first][tracePos.second] != 'E') {
-            grid[tracePos.first][tracePos.second] = 'X'; // Mark solution path
+            grid[tracePos.first][tracePos.second] = 'X'; // Mark final solution path
         }
         tracePos = parent[tracePos.first][tracePos.second];
         return;
@@ -87,11 +89,9 @@ void AStar_Solver::step() {
                 openSet.push({f, {nr, nc}});
             }
         }
-
         // Process only one node per step() call (good for visualization)
         return;
     }
-
     currentState = State::DONE;
     found = false;
 }
