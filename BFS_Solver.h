@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include <utility>
+#include <SFML/System/Clock.hpp> 
 
 class BFS_Solver : public Solver {
 public:
@@ -16,6 +17,9 @@ public:
 private:
     std::queue<std::pair<int,int>> q;
     std::vector<std::vector<bool>> visited;
+
+    // Clock for timing the algorithm
+    sf::Clock m_clock;
 };
 
 #endif  // BFS_SOLVER_H

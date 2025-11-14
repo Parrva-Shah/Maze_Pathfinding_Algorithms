@@ -11,11 +11,19 @@ BFS_Solver::BFS_Solver(const Maze& maze)
     
     q.push(start);//BFS requires a queue for level-by-level exploration
     visited[start.first][start.second] = true;// start and goal are stored as pair<int,int> representing grid coordinates.
+
+    // Start the algorithm's timer
+    m_clock.restart();
 }
 
 void BFS_Solver::step() {
     
     if (currentState == State::TRACING_PATH) {
+        
+        // --- NEW ---
+        // Count this node as part of the final path
+        m_pathLength++;
+        
         if (tracePos == start) {
             currentState = State::DONE;// currentState is an enum that tracks the solver's phase
             return;
@@ -33,11 +41,20 @@ void BFS_Solver::step() {
     if (q.empty()) {
         currentState = State::DONE;
         found = false;
+        
+        // --- NEW ---
+        // Stop the clock if the search fails
+        m_timeTaken = m_clock.getElapsedTime();
+        
         return;
     }
     // Process next cell in the BFS queue
     auto [r, c] = q.front();
     q.pop();
+
+    // --- NEW ---
+    // We are officially processing this node (pulling it from the queue)
+    m_nodesExplored++;
 
     // --- VISUALIZATION FIX ---
     // Color the cell when we *process* it, not when we add it
@@ -50,6 +67,10 @@ void BFS_Solver::step() {
          found = true;
          currentState = State::TRACING_PATH;
          tracePos = goal;
+        
+         // Stop the clock on success
+         m_timeTaken = m_clock.getElapsedTime();
+         
          return;
     }
     // Explore all four directions
@@ -67,4 +88,3 @@ void BFS_Solver::step() {
         q.push({nr, nc});
     }
 }
-
