@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include <queue>
 #include <vector>
+#include <SFML/System/Clock.hpp> 
 
 class Dijkstra_Solver : public Solver {
 public:
@@ -24,6 +25,9 @@ private:
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
     std::vector<std::vector<int>> distMap;
     std::vector<std::vector<bool>> visited;
+    
+    // Clock for timing the algorithm
+    sf::Clock m_clock;
 };
 
 #endif
