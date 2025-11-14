@@ -10,11 +10,18 @@ DFS_Solver::DFS_Solver(const Maze& maze)
     // 'parent' is initialized in base Solver
     
     stk.push(start);//stk is a stack<pair<int,int>> used to implement DFS iteratively.
+    
+    // Start the algorithm's timer
+    m_clock.restart();
 }
 
 void DFS_Solver::step() {
     
     if (currentState == State::TRACING_PATH) {
+        
+        // Count this node as part of the final path
+        m_pathLength++;
+        
         if (tracePos == start) {
             currentState = State::DONE;
             return;
@@ -38,6 +45,10 @@ void DFS_Solver::step() {
         if (visited[r][c]) {
             continue; 
         }
+        
+        // This is the first time we are officially processing this node
+        m_nodesExplored++;
+        
         visited[r][c] = true;
         if (grid[r][c] == ' ') grid[r][c] = symbol;
 
@@ -46,11 +57,15 @@ void DFS_Solver::step() {
             found = true;
             currentState = State::TRACING_PATH;
             tracePos = goal; // Start tracing from the goal
+            
+            // Stop the clock on success
+            m_timeTaken = m_clock.getElapsedTime();
+            
             return; // Exit step
         }
 
         // Push unvisited neighbors
-        for (int i = 3; i >= 0; --i) {
+        for (int i = 3; i >= 0; --i) { // Iterating backwards to explore in a consistent order
             int nr = r + directions[i].first;
             int nc = c + directions[i].second;
             if (!isInside(grid, nr, nc)) continue;
@@ -61,10 +76,16 @@ void DFS_Solver::step() {
             stk.push({nr, nc});
         }
 
+        // We processed one valid, unvisited node. Exit step for visualization.
         return;
     }
+    
+    // This part is reached only if the while loop exits (stack is empty)
     if (currentState == State::SEARCHING) {
         currentState = State::DONE;
         found = false;
+        
+        // Stop the clock if the search fails
+        m_timeTaken = m_clock.getElapsedTime();
     }
 }

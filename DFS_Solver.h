@@ -6,6 +6,7 @@
 #include <stack>
 #include <vector>
 #include <utility>
+#include <SFML/System/Clock.hpp> 
 
 using namespace std;
 
@@ -17,6 +18,9 @@ public:
 private:
     stack<pair<int,int>> stk;      // DFS stack
     vector<vector<bool>> visited;
+    
+    // Clock for timing the algorithm
+    sf::Clock m_clock;
 };
 
 #endif // DFS_SOLVER_H
