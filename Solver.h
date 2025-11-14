@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <SFML/System/Time.hpp>
 #include "Maze.h" 
 
 class Solver {
@@ -18,8 +19,8 @@ public:
     Solver(const Maze& maze, char marker);
     virtual ~Solver() = default;
 
-    // Pure virtual function: forces child classes (BFS, DFS...)
-    // to implement their own step() logic.
+
+    // Makes all algorithms use their own step() function
     virtual void step() = 0;
 
     bool isFinished() const {
@@ -29,11 +30,13 @@ public:
 
     bool wasPathFound() const { return found; }
     std::vector<std::string> getGrid() const { return grid; }
+    int getNodesExplored() const { return m_nodesExplored; }
+    int getPathLength() const { return m_pathLength; }
+    sf::Time getTimeTaken() const { return m_timeTaken; }
+    bool isPathFound() const { return found; } 
 
 
 protected:
-    // --- Members shared by all solvers ---
-
     char symbol;         // The character to draw 
     State currentState;  // The current state of the solver
     bool found;          // Did we find the exit?
@@ -44,8 +47,13 @@ protected:
     std::pair<int, int> goal;
     std::pair<int, int> tracePos; // For tracing the path back
     
-    // Parent map for path reconstruction
+    // Path reconstruction
     std::vector<std::vector<std::pair<int, int>>> parent; 
+
+    // All algorithms (BFS, A*, etc.) must update these
+    int m_nodesExplored = 0;
+    int m_pathLength = 0;
+    sf::Time m_timeTaken = sf::Time::Zero;
 };
 
 #endif // SOLVER_H

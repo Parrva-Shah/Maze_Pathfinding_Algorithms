@@ -1,15 +1,13 @@
-// main.cpp — Sequential SFML Visualizer
+
 #include <iostream>
-#include <vector>
+#include <vector>       // Data Structure: Using std::vector to store ordered lists (e.g., titles, colors)
 #include <string>
-#include <memory>
-
-// SFML Includes
+#include <memory>       //  Data Structure: Using std::unique_ptr for smart pointers (manages solver memory)
+#include <map>          // Data Structure: Using std::map to store results (key=algo name, value=stats)
+#include <limits>   
 #include <SFML/Graphics.hpp> 
-
-// Project Includes
 #include "Maze.h"
-#include "Utils.h" // Assuming this has sleep_ms, clearConsole, etc.
+#include "Utils.h" 
 #include "Solver.h"
 #include "BFS_Solver.h"
 #include "DFS_Solver.h"
@@ -17,85 +15,61 @@
 #include "AStar_Solver.h"
 #include "GreedyBestFirst_Solver.h"
 
-// --- Visualization Constants ---
-const float CELL_SIZE = 20.0f;  // Size of each maze cell in pixels
-const float PADDING = 40.0f;    // Padding around the maze
+// For Visualisation Window 
+const float CELL_SIZE = 20.0f;  
+const float PADDING = 40.0f;    
 const unsigned int FONT_SIZE = 24;
-const float TITLE_HEIGHT = 40.0f; // Space for the title
+const float TITLE_HEIGHT = 40.0f; 
 
-// --- Simulation Timing ---
-const sf::Time TIME_PER_STEP = sf::milliseconds(5); // How fast the algo runs
-const sf::Time PAUSE_ON_FINISH = sf::seconds(2.5f); // How long to show the result
+// To simulate the speed of visualisation
+const sf::Time TIME_PER_STEP = sf::milliseconds(5); 
+const sf::Time PAUSE_ON_FINISH = sf::seconds(2.5f); 
 
-// --- State Definition ---
+// Storing state values
 enum class VizState {
-    Starting, // Showing the base maze
-    Running,  // Algorithm is solving
-    Paused    // Showing the final path
+    Starting,       // Base maze
+    Running,        // Algorithm solving
+    Paused,         // Final path
+    ShowingResults  // Final results screen
+};
+
+// Simple struct to hold results. 
+struct AlgoStats {
+    int nodesExplored = 0;
+    int pathLength = 0;
+    float timeTakenMs = 0.0f;
+    bool pathFound = false;
 };
 
 
-/**
- * @brief Gets the SFML color for a specific cell type.
- * @param cellType The character from the grid ('#', ' ', 'S', 'E', '.', '@')
- * @param traversalColor The unique color for this algorithm's "visited" ('.') cells
- * @return The SFML color to draw.
- */
-// sf::Color getCellColor(char cellType, sf::Color traversalColor) {
-//     switch (cellType) {
-//         case '#': return sf::Color(50, 50, 50);    // Wall
-//         case ' ': return sf::Color::White;          // Empty
-//         case 'S': return sf::Color::Green;          // Start
-//         case 'E': return sf::Color(255, 0, 0, 100); // End (semi-transparent)
-        
-//         // This is the magic:
-//         case '.': return traversalColor;            // Visited (use algo-specific color)
-//         case '@': return sf::Color::Red;            // Path (ALWAYS red, as requested)
-        
-//         default:  return sf::Color::Black;
-//     }
-// }
-/**
- * @brief Gets the SFML color for a specific cell type.
- * @param cellType The character from the grid ('#', ' ', 'S', 'E', 'B', 'D', 'A', 'K', 'G', 'X')
- * @param traversalColor The unique color for this algorithm's "visited" cells
- * @return The SFML color to draw.
- */
+
+ //@brief Gets the SFML color for a specific cell type.
+ 
 sf::Color getCellColor(char cellType, sf::Color traversalColor) {
     switch (cellType) {
         case '#': return sf::Color(50, 50, 50);    // Wall
         case ' ': return sf::Color::White;          // Empty
         case 'S': return sf::Color::Green;          // Start
-        case 'E': return sf::Color::Yellow; // End (semi-transparent)
-        
-        // --- THIS IS THE FIX ---
-        // Your final path character
-        case 'X': return sf::Color::Red;            // Path (ALWAYS red)
-
-        // --- THE SECOND FIX ---
-        // Any other character ('B', 'D', 'A', 'K', 'G')
-        // will fall through to the default case and be colored
-        // with the algorithm-specific traversalColor.
-        default:  return traversalColor;
+        case 'E': return sf::Color::Yellow;         // End 
+        case 'X': return sf::Color::Red;            // Final Path
+        default:  return traversalColor;            // Algorithm's visited color
     }
 }
 
-/**
- * @brief Draws a single maze (either base or from a solver) to the window
- */
+
+ // @brief Draws a single maze (either base or from a solver) to the window
 void drawMaze(sf::RenderWindow& window,
-              const std::vector<std::string>& grid,
+              const std::vector<std::string>& grid, // Data Structure: Using std::vector<std::string> as the 2D grid
               sf::Font& font,
               const std::string& title,
-              sf::Color traversalColor) // The color to use for '.'
+              sf::Color traversalColor) 
 {
-    // --- 1. Draw Title ---
     sf::Text titleText(title, font, FONT_SIZE);
     titleText.setPosition(PADDING, PADDING / 2.0f);
     titleText.setFillColor(sf::Color::White);
     window.draw(titleText);
 
-    // --- 2. Draw Maze Grid ---
+    // Draw maze
     sf::RectangleShape cellRect(sf::Vector2f(CELL_SIZE, CELL_SIZE));
     float gridBaseY = PADDING + TITLE_HEIGHT;
     
@@ -103,7 +77,6 @@ void drawMaze(sf::RenderWindow& window,
         for (size_t c = 0; c < grid[r].size(); ++c) {
             cellRect.setPosition(PADDING + c * CELL_SIZE, gridBaseY + r * CELL_SIZE);
             
-            // Get the char from the grid and find its color
             char cellType = grid[r][c];
             cellRect.setFillColor(getCellColor(cellType, traversalColor));
             
@@ -113,7 +86,8 @@ void drawMaze(sf::RenderWindow& window,
 }
 
 
-// --- Helper function to create a solver by its index ---
+
+ // @brief Helper function to create a solver by its index
 std::unique_ptr<Solver> createSolver(int index, Maze& maze) {
     switch (index) {
         case 0: return std::make_unique<BFS_Solver>(maze);
@@ -127,12 +101,13 @@ std::unique_ptr<Solver> createSolver(int index, Maze& maze) {
 
 
 int main() {
-    // --- 1. Base Maze Setup ---
-    const int R = 31, C = 51; // A good size for one maze
+    // Base maze
+    const int R = 31, C = 51; 
     Maze baseMaze(R, C);
-    Maze mazeCopy = baseMaze; // This will be reset for each algo
+    Maze mazeCopy = baseMaze; 
 
-    // --- 2. Algorithm Definitions ---
+    // All Algorithms implemented
+    // Data Structure: std::vector for ordered lists of titles and colors 
     std::vector<std::string> titles = {
         "1. Breadth-First Search (BFS)",
         "2. Depth-First Search (DFS)",
@@ -149,7 +124,11 @@ int main() {
     };
     int currentAlgoIndex = 0;
 
-    // --- 3. SFML Window Setup ---
+    // Data Structure: std::map to store stats, keyed by algorithm title (string) 
+    std::map<std::string, AlgoStats> results;
+    int shortestPath = std::numeric_limits<int>::max();
+
+    // SFML Window Setup
     const float mazeWidth = baseMaze.getCols() * CELL_SIZE;
     const float mazeHeight = baseMaze.getRows() * CELL_SIZE;
     unsigned int windowWidth = (unsigned int)(mazeWidth + PADDING * 2);
@@ -157,65 +136,72 @@ int main() {
 
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Maze Solver Visualizer");
 
-    // --- 4. Font Setup ---
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
         std::cerr << "Error: Could not load 'arial.ttf'.\n";
         return -1;
     }
     
-    // Instructions Text
     sf::Text instructionText("Press [Space] to start next algorithm", font, 16);
-    instructionText.setFillColor(sf::Color(255, 255, 255, 150)); // semi-transparent
+    instructionText.setFillColor(sf::Color(255, 255, 255, 150)); 
     instructionText.setPosition(PADDING, windowHeight - PADDING / 1.5f);
 
-
-    // --- 5. State & Clock Setup ---
     VizState state = VizState::Starting;
     sf::Clock stepClock;
+    //  Data Structure: std::unique_ptr to hold the currently active solver
     std::unique_ptr<Solver> currentSolver = nullptr;
 
     // Get the base grid once for the start screen
-    auto baseGrid = baseMaze.grid;
+    auto baseGrid = baseMaze.grid; 
     auto baseStart = baseMaze.getStart();
     auto baseGoal = baseMaze.getGoal();
     baseGrid[baseStart.first][baseStart.second] = 'S';
     baseGrid[baseGoal.first][baseGoal.second] = 'E';
 
 
-    // --- 6. Main SFML Game Loop ---
+    // Main loop
     while (window.isOpen()) {
         
-        // --- Event Handling ---
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
-            // Handle starting/progressing
+            
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
+                
                 if (state == VizState::Starting) {
-                    // --- Start the first algorithm ---
+                    // Start the first algorithm 
                     mazeCopy = baseMaze; // Refresh the maze
                     currentSolver = createSolver(currentAlgoIndex, mazeCopy);
                     state = VizState::Running;
                     stepClock.restart();
                 } 
                 else if (state == VizState::Paused) {
-                    // --- Move to the next algorithm ---
+                    // Move to next screen
                     currentAlgoIndex++;
                     if (currentAlgoIndex >= titles.size()) {
-                        currentAlgoIndex = 0; // Loop back
+                        state = VizState::ShowingResults;
+                        currentSolver = nullptr; // Clear the solver
+                    } 
+                    else {
+                        mazeCopy = baseMaze; // Refresh the maze
+                        currentSolver = createSolver(currentAlgoIndex, mazeCopy);
+                        state = VizState::Running;
+                        stepClock.restart();
                     }
-                    mazeCopy = baseMaze; // Refresh the maze
-                    currentSolver = createSolver(currentAlgoIndex, mazeCopy);
-                    state = VizState::Running;
-                    stepClock.restart();
+                }
+                // Results screen
+                else if (state == VizState::ShowingResults) {
+                    currentAlgoIndex = 0;
+                    results.clear(); // Clear the std::map
+                    shortestPath = std::numeric_limits<int>::max();
+                    state = VizState::Starting;
                 }
             }
         }
 
-        // --- Update Logic ---
+        // Update Logic
         if (state == VizState::Running && currentSolver && !currentSolver->isFinished()) {
             if (stepClock.getElapsedTime() > TIME_PER_STEP) {
                 stepClock.restart();
@@ -225,47 +211,128 @@ int main() {
                 if (currentSolver->isFinished()) {
                     state = VizState::Paused;
                     stepClock.restart();
+
+                    // Collect stats for the algorithm that just finished
+                    AlgoStats stats;
+                    stats.nodesExplored = currentSolver->getNodesExplored();
+                    stats.pathLength = currentSolver->getPathLength();
+                    stats.timeTakenMs = currentSolver->getTimeTaken().asMilliseconds(); 
+                    stats.pathFound = currentSolver->isPathFound();
+                    
+                    results[titles[currentAlgoIndex]] = stats; 
+
+                    // Update "true" shortest path from complete algorithms
+                    if (stats.pathFound && (titles[currentAlgoIndex].find("BFS") != std::string::npos || 
+                                           titles[currentAlgoIndex].find("A*") != std::string::npos || 
+                                           titles[currentAlgoIndex].find("Dijkstra") != std::string::npos)) 
+                    {
+                        if (stats.pathLength < shortestPath) {
+                            shortestPath = stats.pathLength;
+                        }
+                    }
                 }
             }
         }
-        // Check if the pause time has elapsed (this is an automatic transition)
-        /*
-        // --- This code block makes it transition automatically ---
-        // --- Remove the 'else if (state == VizState::Paused)' in event handling if you use this ---
-        if (state == VizState::Paused && stepClock.getElapsedTime() > PAUSE_ON_FINISH) {
-            currentAlgoIndex++;
-            if (currentAlgoIndex >= titles.size()) {
-                currentAlgoIndex = 0; // Loop back
-            }
-            mazeCopy = baseMaze; // Refresh the maze
-            currentSolver = createSolver(currentAlgoIndex, mazeCopy);
-            state = VizState::Running;
-            stepClock.restart();
-        }
-        */
-
-
-        // --- Drawing ---
-        window.clear(sf::Color(20, 20, 20)); // Dark background
+        
+        window.clear(sf::Color(20, 20, 20));
 
         if (state == VizState::Starting) {
             // Draw the base maze
             drawMaze(window, baseGrid, font, "Base Maze (Press Space)", sf::Color::Transparent);
         } 
-        else if (currentSolver) {
-            // Get the solver's current grid
+        else if (currentSolver) { 
+            // Get the solver's current grid (likely a std::vector<std::string>)
             auto grid = currentSolver->getGrid();
-            // Add Start/End back in (since solvers remove them)
+            // Add Start/End back in
             grid[baseStart.first][baseStart.second] = 'S';
             grid[baseGoal.first][baseGoal.second] = 'E';
 
             // Draw the solver's grid
             drawMaze(window, grid, font, titles[currentAlgoIndex], traversalColors[currentAlgoIndex]);
             
-            // If paused, show the "Press Space" text
             if (state == VizState::Paused) {
                 window.draw(instructionText);
             }
+        }
+        else if (state == VizState::ShowingResults) {
+            window.clear(sf::Color::White); // White background for results
+
+            float yPos = 50.0f;
+            float xMargin = 50.0f;
+
+            // Title
+            sf::Text title("Final Results", font, 30);
+            title.setFillColor(sf::Color::Black);
+            title.setPosition(xMargin, yPos);
+            window.draw(title);
+            yPos += 60;
+
+            // Shortest Distance
+            std::string shortestText = "True Shortest Distance: " + 
+                                       (shortestPath == std::numeric_limits<int>::max() ? "No Path Found" : std::to_string(shortestPath) + " nodes");
+            sf::Text shortest(shortestText, font, 24);
+            shortest.setFillColor(sf::Color(0, 0, 150)); // Dark blue
+            shortest.setPosition(xMargin, yPos);
+            window.draw(shortest);
+            yPos += 70;
+            sf::Text header("Algorithm", font, 20);
+            header.setFillColor(sf::Color::Black);
+            header.setStyle(sf::Text::Bold | sf::Text::Underlined);
+            header.setPosition(xMargin, yPos);
+            window.draw(header);
+
+            header.setString("Time (ms)");
+            header.setPosition(xMargin + 300, yPos);
+            window.draw(header);
+
+            header.setString("Nodes Explored");
+            header.setPosition(xMargin + 500, yPos);
+            window.draw(header);
+
+            header.setString("Path Found (Length)");
+            header.setPosition(xMargin + 750, yPos);
+            window.draw(header);
+            yPos += 40;
+
+            // Loop through and draw results for each algorithm 
+            for (const std::string& algoName : titles) {
+                // Check if the key exists in our 'results' std::map
+                if (results.find(algoName) == results.end()) continue; 
+                
+                const AlgoStats& stats = results.at(algoName);
+
+                sf::Text lineText(algoName, font, 20);
+                lineText.setFillColor(sf::Color::Black);
+                lineText.setPosition(xMargin, yPos);
+                window.draw(lineText);
+                
+                // Time
+                char timeBuffer[32];
+                std::snprintf(timeBuffer, sizeof(timeBuffer), "%.4f", stats.timeTakenMs);
+                lineText.setString(timeBuffer);
+                lineText.setPosition(xMargin + 300, yPos);
+                window.draw(lineText);
+
+                // Nodes Explored
+                lineText.setString(std::to_string(stats.nodesExplored));
+                lineText.setPosition(xMargin + 500, yPos);
+                window.draw(lineText);
+
+                // Path Found (Length)
+                std::string pathStr = stats.pathFound ? std::to_string(stats.pathLength) + " nodes" : "No Path";
+                lineText.setString(pathStr);
+                lineText.setFillColor(stats.pathFound ? sf::Color(0, 100, 0) : sf::Color::Red);
+                lineText.setPosition(xMargin + 750, yPos);
+                window.draw(lineText);
+
+                yPos += 35; // Next line
+            }
+            
+            // Reset instructions
+            sf::Text resetText("Press [Space] to restart", font, 22);
+            resetText.setFillColor(sf::Color::Black);
+            resetText.setPosition(xMargin, windowHeight - 60);
+            window.draw(resetText);
         }
 
         window.display();
