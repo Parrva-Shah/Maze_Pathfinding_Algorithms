@@ -21,14 +21,11 @@ bool isInside(const vector<string>& g, int r, int c) {
 }
 
 void clearConsole() {
-    // --- THIS IS THE CROSS-PLATFORM FIX ---
     #ifdef _WIN32
         system("cls");
     #else
-        // Assumes UNIX-like system (Linux, macOS)
         system("clear");
     #endif
-    // --- END FIX ---
 }
 
 void sleep_ms(int ms) {
@@ -47,7 +44,7 @@ void printSideBySide(const vector<vector<string>>& grids,
     size_t C_WIDTH = (grids[0].empty() ? 0 : grids[0][0].size()) + 3;
     size_t TITLE_WIDTH = C_WIDTH; 
 
-    // --- Print Top Row (Solvers 0, 1, 2) ---
+    // Print Top Row (Solvers 0, 1, 2)
     if (N > 0) {
         // Print top 3 titles
         for (size_t i = 0; i < 3 && i < N; i++) {
@@ -72,7 +69,7 @@ void printSideBySide(const vector<vector<string>>& grids,
 
     cout << "\n\n"; // Spacer between rows
 
-    // --- Print Bottom Row (Solvers 3, 4, 5) ---
+    // Print Bottom Row (Solvers 3, 4)
     if (N > 3) {
         // Print bottom 3 titles
         for (size_t i = 3; i < 6 && i < N; i++) {
