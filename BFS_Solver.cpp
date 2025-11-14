@@ -20,7 +20,6 @@ void BFS_Solver::step() {
     
     if (currentState == State::TRACING_PATH) {
         
-        // --- NEW ---
         // Count this node as part of the final path
         m_pathLength++;
         
@@ -42,7 +41,6 @@ void BFS_Solver::step() {
         currentState = State::DONE;
         found = false;
         
-        // --- NEW ---
         // Stop the clock if the search fails
         m_timeTaken = m_clock.getElapsedTime();
         
@@ -52,11 +50,9 @@ void BFS_Solver::step() {
     auto [r, c] = q.front();
     q.pop();
 
-    // --- NEW ---
     // We are officially processing this node (pulling it from the queue)
     m_nodesExplored++;
 
-    // --- VISUALIZATION FIX ---
     // Color the cell when we *process* it, not when we add it
     if (grid[r][c] == ' ') {
         grid[r][c] = symbol;
