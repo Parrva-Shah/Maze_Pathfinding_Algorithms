@@ -7,6 +7,7 @@
 #include <vector>
 #include <utility>
 #include <cmath> 
+#include <SFML/System/Clock.hpp>
 
 // Greedy Best-First Search (GBFS)
 // Only follows the heuristic (h-score), ignores path cost (g-score)
@@ -30,6 +31,9 @@ private:
     std::vector<std::vector<bool>> visited; // No gScore needed, just visited
 
     int heuristic(int r, int c) const;
+    
+    // Clock for timing the algorithm
+    sf::Clock m_clock;
 };
 
 #endif // GREEDY_BEST_FIRST_SOLVER_H

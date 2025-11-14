@@ -13,6 +13,9 @@ GreedyBestFirst_Solver::GreedyBestFirst_Solver(const Maze& maze)
     
     int hStart = heuristic(start.first, start.second);
     openSet.push({hStart, start});// openSet is a std::priority_queue<Node> (min-heap by heuristic).
+    
+    // Start the algorithm's timer
+    m_clock.restart();
 }
 
 int GreedyBestFirst_Solver::heuristic(int r, int c) const {
@@ -23,6 +26,10 @@ int GreedyBestFirst_Solver::heuristic(int r, int c) const {
 void GreedyBestFirst_Solver::step() {
     // Path Tracing
     if (currentState == State::TRACING_PATH) {
+        
+        // Count this node as part of the final path
+        m_pathLength++;
+        
         if (tracePos == start) {
             currentState = State::DONE;
             return;
@@ -40,6 +47,10 @@ void GreedyBestFirst_Solver::step() {
     if (openSet.empty()) {
         currentState = State::DONE;
         found = false;
+        
+        // Stop the clock if the search fails
+        m_timeTaken = m_clock.getElapsedTime();
+        
         return;
     }
 
@@ -50,6 +61,10 @@ void GreedyBestFirst_Solver::step() {
         auto [r, c] = current.pos;
 
         if (visited[r][c]) continue; // Already processed
+        
+        // Increase no. of nodes explored
+        m_nodesExplored++;
+        
         visited[r][c] = true;
 
         // Color when processing
@@ -61,6 +76,10 @@ void GreedyBestFirst_Solver::step() {
             found = true;
             currentState = State::TRACING_PATH;
             tracePos = goal;
+            
+            // Stop the clock on success
+            m_timeTaken = m_clock.getElapsedTime();
+            
             return; // Exit step
         }
 
@@ -85,4 +104,9 @@ void GreedyBestFirst_Solver::step() {
     // If loop finishes, openSet was emptied
     currentState = State::DONE;
     found = false;
+    
+    // Make sure clock is stopped even if it fails
+    if (m_timeTaken == sf::Time::Zero) {
+        m_timeTaken = m_clock.getElapsedTime();
+    }
 }
