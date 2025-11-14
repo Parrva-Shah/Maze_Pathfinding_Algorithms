@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include <utility>
+#include <SFML/System/Clock.hpp> 
 
 class AStar_Solver : public Solver {
 public:
@@ -21,11 +22,15 @@ private:
         bool operator>(const NodeData& other) const { return f > other.f; }
     };
 
+    // Data structure: A min-priority-queue (binary heap)
     std::priority_queue<NodeData, std::vector<NodeData>, std::greater<NodeData>> openSet;
     std::vector<std::vector<int>> gScore;
     std::vector<std::vector<bool>> visited;
 
     int heuristic(int r, int c) const;
+    
+    // Clock for timing the algorithm
+    sf::Clock m_clock;
 };
 
 #endif  // ASTAR_SOLVER_H

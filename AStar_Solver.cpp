@@ -21,6 +21,9 @@ AStar_Solver::AStar_Solver(const Maze& maze)
     // Push starting node with its f-score
     int fStart = heuristic(start.first, start.second);
     openSet.push({fStart, start});//a priority_queue (binary heap) that always exposes the node with the lowest 
+    
+    // Start the algorithm's timer
+    m_clock.restart();
 }
 
 int AStar_Solver::heuristic(int r, int c) const {
@@ -32,6 +35,10 @@ void AStar_Solver::step() {
 
     // If path found earlier, now backtracking the parent pointers
     if (currentState == State::TRACING_PATH) {
+        
+        // Count this node as part of the final path
+        m_pathLength++;
+        
         if (tracePos == start) {
             currentState = State::DONE;
             return;
@@ -49,6 +56,10 @@ void AStar_Solver::step() {
     if (openSet.empty()) {
         currentState = State::DONE;
         found = false;
+        
+        // Stop the clock if the search fails
+        m_timeTaken = m_clock.getElapsedTime();
+        
         return;
     }
 
@@ -60,6 +71,9 @@ void AStar_Solver::step() {
 
         if (visited[r][c]) continue;
         visited[r][c] = true;
+        
+        // Increase node exploration count
+        m_nodesExplored++;
 
         // Mark this cell as explored
         if (grid[r][c] == ' ')
@@ -70,6 +84,10 @@ void AStar_Solver::step() {
             found = true;
             currentState = State::TRACING_PATH;
             tracePos = goal;
+            
+            // Stop the clock on success
+            m_timeTaken = m_clock.getElapsedTime();
+            
             return;
         }
 
@@ -92,6 +110,13 @@ void AStar_Solver::step() {
         // Process only one node per step() call (good for visualization)
         return;
     }
+    
+    // This part is likely unreachable if openSet.empty() is checked above,
+    // but we stop the clock here just in case.
     currentState = State::DONE;
     found = false;
+    
+    if (m_timeTaken == sf::Time::Zero) { // Only set if not already set
+        m_timeTaken = m_clock.getElapsedTime();
+    }
 }
