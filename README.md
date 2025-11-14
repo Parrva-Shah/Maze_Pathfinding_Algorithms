@@ -4,8 +4,9 @@ This is a C++ application that visualizes and compares five different pathfindin
 
 This repository is pre-configured for **Linux** development with Visual Studio Code, including a build task and IntelliSense settings and we the reproducibility of the repository is dependent on it. We have included seperate instructions to run this on windows as well but then the `.json` files go to waste.
 
-
-
+Made by : Parrva Chirag Shah (B24CS1053)
+          Ishita Tyagi (B24CS1083)
+(This is a new repository created on 10th November when our third group member Veer Shah ditched the group, we have talked with Prajjwal via mail and he told us to proceed as a group of two)
 ##  Features
 
 * **Real-Time Visualization**: Watch each algorithm explore the maze step-by-step.
