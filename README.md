@@ -4,6 +4,34 @@ This is a C++ application that visualizes and compares five different pathfindin
 
 This repository is pre-configured for **Linux** development with Visual Studio Code, including a build task and IntelliSense settings and we the reproducibility of the repository is dependent on it. We have included separate instructions to run this on windows as well but then the `.json` files go to waste.
 
+---
+
+##  Quick Start (One Command)
+
+No manual setup needed — just clone and run the script for your OS.
+
+### Linux
+```sh
+git clone https://github.com/Parrva-Shah/Maze_Pathfinding_Algorithms.git
+cd Maze_Pathfinding_Algorithms
+chmod +x run.sh && ./run.sh
+```
+The script automatically installs `g++` and `libsfml-dev` via `apt` if they are missing, then compiles and launches the program.
+
+### Windows
+```bat
+git clone https://github.com/Parrva-Shah/Maze_Pathfinding_Algorithms.git
+cd Maze_Pathfinding_Algorithms
+run.bat
+```
+The script installs MinGW (`g++`) via [Chocolatey](https://chocolatey.org/install) automatically.
+> **One-time SFML setup (Windows only):** Download the MinGW 64-bit SFML package from [sfml-dev.org](https://www.sfml-dev.org/download.php), extract it, and place it at `C:\sfml`. The script will find it and handle the rest on every subsequent run.
+
+### Linux (if dependencies are already installed)
+```sh
+make run
+```
+
 Made by : Parrva Chirag Shah (B24CS1053)
           Ishita Tyagi (B24CS1083)
 (This is a new repository created on 10th November when our third group member Veer Shah ditched the group, we have talked with Prajjwal via mail and he told us to proceed as a group of two)
