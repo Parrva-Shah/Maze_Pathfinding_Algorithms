@@ -6,6 +6,14 @@ This repository is pre-configured for **Linux** development with Visual Studio C
 
 ---
 
+##  About
+
+A C++ desktop application built to visualize and benchmark five classic pathfinding algorithms — BFS, DFS, Dijkstra, A\*, and Greedy Best-First — on a randomly generated maze. Developed as an academic project to study algorithm efficiency through real-time step-by-step animation and a side-by-side performance comparison of time, nodes explored, and path length.
+
+Built with **C++17** and **SFML**. Runs on Linux and Windows.
+
+---
+
 ##  Quick Start (One Command)
 
 No manual setup needed — just clone and run the script for your OS.
