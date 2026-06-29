@@ -91,8 +91,11 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM ── Step 4: Copy DLLs (SFML + GCC runtime + transitive deps) ────────────────
+REM ── Step 4: Copy DLLs (bundled first, then SFML install fallback) ────────────
 echo [*] Copying DLLs...
+if exist "libs\" (
+    copy /y "libs\*.dll" . >nul 2>&1
+)
 for %%D in (
     libsfml-graphics-2.dll libsfml-window-2.dll libsfml-system-2.dll
     sfml-graphics-2.dll    sfml-window-2.dll    sfml-system-2.dll
