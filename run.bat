@@ -2,45 +2,75 @@
 setlocal enabledelayedexpansion
 echo === Maze Pathfinding Visualizer ===
 
-REM ── Step 1: Ensure Chocolatey is available ──────────────────────────────────
+REM ── Step 1: Locate g++ ───────────────────────────────────────────────────────
+set GPP=
+where g++ >nul 2>&1
+if %errorlevel% equ 0 (
+    for /f "delims=" %%i in ('where g++') do set GPP=%%i & goto :gpp_found
+)
+
+REM Try common MSYS2 locations
+for %%P in (C:\msys64\ucrt64\bin C:\msys64\mingw64\bin C:\msys64\mingw32\bin) do (
+    if exist "%%P\g++.exe" (
+        set GPP=%%P\g++.exe
+        set PATH=%%P;%PATH%
+        goto :gpp_found
+    )
+)
+
+REM Fall back to Chocolatey
 where choco >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [!] Chocolatey not found.
-    echo     Install it from https://chocolatey.org/install, then re-run this script.
+    echo [!] g++ not found and Chocolatey is not installed.
+    echo     Option A: Install MSYS2 from https://www.msys2.org/ and run:
+    echo               pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-sfml
+    echo     Option B: Install Chocolatey from https://chocolatey.org/install
+    echo               then re-run this script.
     pause
     exit /b 1
 )
+echo [*] Installing MinGW via Chocolatey...
+choco install mingw -y
+call refreshenv
 
-REM ── Step 2: Ensure MinGW (g++) is installed ──────────────────────────────────
-where g++ >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [*] g++ not found. Installing MinGW via Chocolatey...
-    choco install mingw -y
-    call refreshenv
+:gpp_found
+echo [*] Using g++: %GPP%
+
+REM ── Step 2: Locate SFML ──────────────────────────────────────────────────────
+set SFML_DIR=
+set SFML_BIN=
+
+REM Check MSYS2 ucrt64 / mingw64 first (covers most Windows developer setups)
+for %%P in (C:\msys64\ucrt64 C:\msys64\mingw64 C:\msys64\mingw32) do (
+    if exist "%%P\include\SFML\Graphics.hpp" (
+        set SFML_DIR=%%P
+        set SFML_BIN=%%P\bin
+        goto :sfml_found
+    )
 )
 
-REM ── Step 3: Locate SFML ──────────────────────────────────────────────────────
-REM Look for SFML in a few common locations
-set SFML_DIR=
-
+REM Check manual install locations
 for %%P in (C:\sfml C:\SFML C:\libs\sfml C:\libs\SFML) do (
     if exist "%%P\include\SFML\Graphics.hpp" (
         set SFML_DIR=%%P
+        set SFML_BIN=%%P\bin
         goto :sfml_found
     )
 )
 
 echo.
-echo [!] SFML not found. One-time setup required:
+echo [!] SFML not found. Choose one of these one-time setup options:
 echo.
-echo     1. Download the MinGW 64-bit build from:
-echo        https://www.sfml-dev.org/download.php
-echo        (choose "GCC ... MinGW ... 64-bit")
+echo     Option A (recommended - if you have MSYS2):
+echo       Open the MSYS2 UCRT64 shell and run:
+echo         pacman -S mingw-w64-ucrt-x86_64-sfml
 echo.
-echo     2. Extract the zip and rename/move the folder to:  C:\sfml
-echo        It should look like:  C:\sfml\include\SFML\Graphics.hpp
+echo     Option B (manual):
+echo       1. Download MinGW 64-bit SFML from https://www.sfml-dev.org/download.php
+echo       2. Extract and place at C:\sfml
+echo          (so that C:\sfml\include\SFML\Graphics.hpp exists)
 echo.
-echo     3. Re-run this script.
+echo     Then re-run this script.
 echo.
 pause
 exit /b 1
@@ -48,9 +78,9 @@ exit /b 1
 :sfml_found
 echo [*] SFML found at %SFML_DIR%
 
-REM ── Step 4: Compile ──────────────────────────────────────────────────────────
+REM ── Step 3: Compile ──────────────────────────────────────────────────────────
 echo [*] Building...
-g++ -O2 -std=c++17 *.cpp -o maze_visualizer.exe ^
+"%GPP%" -O2 -std=c++17 *.cpp -o maze_visualizer.exe ^
     -I "%SFML_DIR%\include" ^
     -L "%SFML_DIR%\lib" ^
     -lsfml-graphics -lsfml-window -lsfml-system
@@ -61,10 +91,15 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM ── Step 5: Copy DLLs next to the executable ─────────────────────────────────
+REM ── Step 4: Copy DLLs ────────────────────────────────────────────────────────
 echo [*] Copying SFML DLLs...
-copy /y "%SFML_DIR%\bin\*.dll" . >nul
+copy /y "%SFML_BIN%\libsfml-graphics*.dll" . >nul 2>&1
+copy /y "%SFML_BIN%\libsfml-window*.dll"   . >nul 2>&1
+copy /y "%SFML_BIN%\libsfml-system*.dll"   . >nul 2>&1
+copy /y "%SFML_BIN%\sfml-graphics*.dll"    . >nul 2>&1
+copy /y "%SFML_BIN%\sfml-window*.dll"      . >nul 2>&1
+copy /y "%SFML_BIN%\sfml-system*.dll"      . >nul 2>&1
 
-REM ── Step 6: Run ──────────────────────────────────────────────────────────────
+REM ── Step 5: Run ──────────────────────────────────────────────────────────────
 echo [*] Launching...
 maze_visualizer.exe
