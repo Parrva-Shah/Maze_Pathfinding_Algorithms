@@ -2,7 +2,7 @@
 
 This is a C++ application that visualizes and compares five different pathfinding algorithms in real-time using the SFML library. The program generates a random maze, runs each algorithm to find a path from the start ('S') to the goal ('E'), and then displays a final screen comparing the performance of each algorithm.
 
-This repository is pre-configured for **Linux** development with Visual Studio Code, including a build task and IntelliSense settings and we the reproducibility of the repository is dependent on it. We have included seperate instructions to run this on windows as well but then the `.json` files go to waste.
+This repository is pre-configured for **Linux** development with Visual Studio Code, including a build task and IntelliSense settings and we the reproducibility of the repository is dependent on it. We have included separate instructions to run this on windows as well but then the `.json` files go to waste.
 
 Made by : Parrva Chirag Shah (B24CS1053)
           Ishita Tyagi (B24CS1083)
