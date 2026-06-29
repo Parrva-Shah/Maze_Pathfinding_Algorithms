@@ -91,14 +91,18 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM ── Step 4: Copy DLLs ────────────────────────────────────────────────────────
-echo [*] Copying SFML DLLs...
-copy /y "%SFML_BIN%\libsfml-graphics*.dll" . >nul 2>&1
-copy /y "%SFML_BIN%\libsfml-window*.dll"   . >nul 2>&1
-copy /y "%SFML_BIN%\libsfml-system*.dll"   . >nul 2>&1
-copy /y "%SFML_BIN%\sfml-graphics*.dll"    . >nul 2>&1
-copy /y "%SFML_BIN%\sfml-window*.dll"      . >nul 2>&1
-copy /y "%SFML_BIN%\sfml-system*.dll"      . >nul 2>&1
+REM ── Step 4: Copy DLLs (SFML + GCC runtime + transitive deps) ────────────────
+echo [*] Copying DLLs...
+for %%D in (
+    libsfml-graphics-2.dll libsfml-window-2.dll libsfml-system-2.dll
+    sfml-graphics-2.dll    sfml-window-2.dll    sfml-system-2.dll
+    libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll
+    libfreetype-6.dll libpng16-16.dll zlib1.dll
+    libharfbuzz-0.dll libgraphite2.dll libglib-2.0-0.dll
+    libbz2-1.dll libbrotlidec.dll libintl-8.dll
+) do (
+    if exist "%SFML_BIN%\%%D" copy /y "%SFML_BIN%\%%D" . >nul 2>&1
+)
 
 REM ── Step 5: Run ──────────────────────────────────────────────────────────────
 echo [*] Launching...
